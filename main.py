@@ -5,8 +5,8 @@ from tkinter.filedialog import askopenfilename
 from selenium import webdriver
 
 data = json.load(open('D:\passwords.json'))
-password = str(data['site_password'])
-username = str(data['site_username'])
+password = data['site_password']
+username = data['site_username']
 driver = webdriver.Edge('/Users/Mohamed/Downloads/msedgedriver')
 driver.maximize_window()
 driver.get("https://std.eng.alexu.edu.eg/static/index.html")
