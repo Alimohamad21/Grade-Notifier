@@ -50,9 +50,6 @@ def midterm_marks_notifier():
                 root = tkinter.Tk()
                 root.withdraw()
                 messagebox.showerror(course, grade)
-                directory = tkinter.filedialog.askdirectory()
-                f = open(directory + '/results.txt', 'a+')
-                f.write(grade)
         driver.refresh()
 
 
