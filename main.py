@@ -1,7 +1,7 @@
 import json
 import tkinter
 from tkinter import messagebox
-from tkinter.filedialog import askopenfilename
+
 from selenium import webdriver
 
 data = json.load(open('D:\passwords.json'))
@@ -30,6 +30,7 @@ driver.find_element_by_id("login_btn").click()
 
 def midterm_marks_notifier():
     while True:
+        updated_grades = json.load(open('latest_results.json', 'r'))
         for i in range(1, 7):
             while True:
                 try:
@@ -46,10 +47,12 @@ def midterm_marks_notifier():
                 except:
                     pass
 
-            if len(grade) > 1:
+            if grade != updated_grades[course]:
+                updated_grades[course]=grade
                 root = tkinter.Tk()
                 root.withdraw()
-                messagebox.showerror(course, grade)
+                messagebox.showinfo(course, grade)
+                json.dump(updated_grades,open('latest_results.json', 'w'))
         driver.refresh()
 
 
