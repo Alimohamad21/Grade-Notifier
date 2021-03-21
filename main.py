@@ -162,4 +162,3 @@ if option == '1':
     site.midterm_marks_notifier()
 if option == '2':
     site.final_grade_notifier()
-site.final_grade_notifier()
