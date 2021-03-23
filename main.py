@@ -57,7 +57,7 @@ class Site:
         self.driver.maximize_window()
         driver.get("https://std.eng.alexu.edu.eg/static/index.html")
         driver.execute_script('''window.open("https://web.whatsapp.com/","_blank");''')
-        input('Please enter QR code then press any button to proceed:')
+        input('Please scan QR code then press any button to proceed:')
         driver.switch_to.window(driver.window_handles[0])
         while True:
             try:
@@ -148,11 +148,12 @@ class Site:
                     email_subject = course + ' : ' + grade
                     email_message = f'{course} grade is out! grade: {grade}'
                     email.send_email(email_receiver, email_subject, email_message)
-                    root = tkinter.Tk()
-                    root.withdraw()
-                    messagebox.showinfo(course, grade)
+                    # root = tkinter.Tk()
+                    # root.withdraw()
+                    # messagebox.showinfo(course, grade)
                     json.dump(updated_grades, open('final_grades.json', 'w'))
             self.driver.refresh()
+
 
 option = input('1- Coursework Notifier\n2- Final Grade Notifier\n\nPlease choose an option from the above:')
 data = json.load(open('D:\passwords.json'))
