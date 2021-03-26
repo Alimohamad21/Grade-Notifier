@@ -56,9 +56,6 @@ class Site:
     def open_site(self):
         self.driver.maximize_window()
         driver.get("https://std.eng.alexu.edu.eg/static/index.html")
-        driver.execute_script('''window.open("https://web.whatsapp.com/","_blank");''')
-        input('Please scan QR code then press any button to proceed:')
-        driver.switch_to.window(driver.window_handles[0])
         while True:
             try:
                 self.driver.find_element_by_id("details-button").click()
@@ -80,7 +77,7 @@ class Site:
         self.open_site()
         while True:
             updated_grades = json.load(open('latest_results.json', 'r'))
-            for i in range(1, 7):
+            for i in range(1, 8):
                 while True:
                     try:
                         course = self.driver.find_element_by_xpath(
@@ -107,6 +104,9 @@ class Site:
     def final_grade_notifier(self):
         data = json.load(open('D:\passwords.json'))
         self.open_site()
+        driver.execute_script('''window.open("https://web.whatsapp.com/","_blank");''')
+        input('Please scan QR code then press any button to proceed:')
+        driver.switch_to.window(driver.window_handles[0])
         while True:
             while True:
                 try:
@@ -117,22 +117,35 @@ class Site:
                 except:
                     pass
             updated_grades = json.load(open('final_grades.json', 'r'))
-            for i in range(1, 7):
+            counter = 0
+            restart = False
+            for i in range(1, 8):
                 while True:
+                    if counter > 50:
+                        break
+                        restart = True
+                    counter += 1
                     try:
                         course = self.driver.find_element_by_xpath(
-                            f"/html/body/div/section[2]/div/table[5]/tbody/tr[{i}]/td[2]").text
+                            f"/html/body/div/section[2]/div/table[6]/tbody/tr[{i}]/td[2]").text
                         break
                     except:
                         pass
+                if restart:
+                    break
                 while True:
                     try:
+                        if counter > 50:
+                            break
+                            restart = True
+                        counter += 1
                         grade = self.driver.find_element_by_xpath(
-                            f"/html/body/div/section[2]/div/table[5]/tbody/tr[{i}]/td[4]").text
+                            f"/html/body/div/section[2]/div/table[6]/tbody/tr[{i}]/td[4]").text
                         break
                     except:
                         pass
-
+                if restart:
+                    break
                 if grade != updated_grades[course]:
                     updated_grades[course] = grade
                     driver.switch_to.window(driver.window_handles[1])
@@ -154,8 +167,19 @@ class Site:
                     json.dump(updated_grades, open('final_grades.json', 'w'))
             self.driver.refresh()
 
+    def registration_bot(self):
+        self.open_site()
+        while True:
+            try:
+                self.driver.find_element_by_xpath('/html/body/div/section[1]/nav/ul/li[3]/a').click()
+                break
+            except:
+                pass
+        self.driver.find_element_by_xpath('/html/body/div[2]/div[11]/div/button').click()
 
-option = input('1- Coursework Notifier\n2- Final Grade Notifier\n\nPlease choose an option from the above:')
+
+option = input(
+    '1- Coursework Notifier\n2- Final Grade Notifier\n3- Registration bot\n\nPlease choose an option from the above:')
 data = json.load(open('D:\passwords.json'))
 driver = webdriver.Edge('/Users/Mohamed/Downloads/msedgedriver')
 site = Site(driver, data['site_username'], data['site_password'])
@@ -163,3 +187,5 @@ if option == '1':
     site.midterm_marks_notifier()
 if option == '2':
     site.final_grade_notifier()
+if option == '3':
+    site.registration_bot()
