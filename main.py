@@ -105,7 +105,14 @@ class Site:
         data = json.load(open('D:\passwords.json'))
         self.open_site()
         driver.execute_script('''window.open("https://web.whatsapp.com/","_blank");''')
-        input('Please scan QR code then press any button to proceed:')
+        driver.switch_to.window(driver.window_handles[1])
+        while True:
+            try:
+                qr_code_scanned = self.driver.find_element_by_xpath(
+                    '/html/body/div/div/div/div[3]/div/header/div[2]/div/span/div[3]/div/span')
+                break
+            except:
+                pass
         driver.switch_to.window(driver.window_handles[0])
         while True:
             while True:
