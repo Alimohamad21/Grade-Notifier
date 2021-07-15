@@ -41,9 +41,9 @@ class Whatsapp:
         contact = self.driver.find_element_by_xpath(f'//span[@title = "{receiver}"]')
         contact.click()
         msgBox = self.driver.find_element_by_xpath(
-            '/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[2]/div/div[2]')
+            '/html/body/div/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div[2]/div/div[1]')
         msgBox.send_keys(message)
-        sendButton = self.driver.find_element_by_xpath('/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[3]')
+        sendButton = self.driver.find_element_by_xpath('/html/body/div/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div[2]/div/div[2]')
         sendButton.click()
 
 
@@ -124,6 +124,16 @@ class Site:
                 except:
                     pass
             updated_grades = json.load(open('final_grades.json', 'r'))
+            whatsapp = Whatsapp(self.driver)
+            earned_hours = self.driver.find_element_by_xpath(
+                '/html/body/div/section[2]/div/table[6]/tbody/tr[8]/td/font[4]').text
+            if earned_hours != updated_grades['earned hours']:
+                driver.switch_to.window(driver.window_handles[1])
+                for receiver in data['notification_receivers']:
+                    whatsapp.send_message(receiver, f'fee {earned_hours} earned hours nezlo 3al site')
+                driver.switch_to.window(driver.window_handles[0])
+                updated_grades['earned hours'] = earned_hours
+                json.dump(updated_grades, open('final_grades.json', 'w'))
             counter = 0
             restart = False
             for i in range(1, 8):
@@ -156,7 +166,6 @@ class Site:
                 if grade != updated_grades[course]:
                     updated_grades[course] = grade
                     driver.switch_to.window(driver.window_handles[1])
-                    whatsapp = Whatsapp(self.driver)
                     for receiver in data['grade_receivers']:
                         receiver += ' 🏠'
                         whatsapp.send_message(receiver, f'{course} {grade}')
@@ -165,12 +174,9 @@ class Site:
                     driver.switch_to.window(driver.window_handles[0])
                     email = Email(data['email_username'], data['email_password'])
                     email_receiver = data['personal_email']
-                    email_subject = course + ' : ' + grade
+                    email_subject = f'{course} : {grade}'
                     email_message = f'{course} grade is out! grade: {grade}'
                     email.send_email(email_receiver, email_subject, email_message)
-                    # root = tkinter.Tk()
-                    # root.withdraw()
-                    # messagebox.showinfo(course, grade)
                     json.dump(updated_grades, open('final_grades.json', 'w'))
             self.driver.refresh()
 
@@ -186,7 +192,7 @@ class Site:
 
 
 option = input(
-    '1- Coursework Notifier\n2- Final Grade Notifier\n3- Registration bot\n\nPlease choose an option from the above:')
+    '1- Coursework Notifier\n2- Final Grade Notifier\n\n\nPlease choose an option from the above:')
 data = json.load(open('D:\passwords.json'))
 driver = webdriver.Edge('/Users/Mohamed/Downloads/msedgedriver')
 site = Site(driver, data['site_username'], data['site_password'])
