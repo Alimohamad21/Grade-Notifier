@@ -1,4 +1,5 @@
 import json
+import operator
 import smtplib
 import ssl
 import tkinter
@@ -43,7 +44,8 @@ class Whatsapp:
         msgBox = self.driver.find_element_by_xpath(
             '/html/body/div/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div[2]/div/div[1]')
         msgBox.send_keys(message)
-        sendButton = self.driver.find_element_by_xpath('/html/body/div/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div[2]/div/div[2]')
+        sendButton = self.driver.find_element_by_xpath(
+            '/html/body/div/div[1]/div[1]/div[4]/div[1]/footer/div[1]/div[2]/div/div[2]')
         sendButton.click()
 
 
@@ -190,9 +192,61 @@ class Site:
                 pass
         self.driver.find_element_by_xpath('/html/body/div[2]/div[11]/div/button').click()
 
+    def get_stats(self):
+        self.open_site()
+        while True:
+            try:
+                self.driver.find_element_by_xpath('/html/body/div/section[1]/nav/ul/li[8]/a').click()
+                if self.driver.find_element_by_xpath(
+                        '/html/body/div/section[2]/div/div/h1').text == 'Courses Grades':
+                    break
+            except:
+                pass
+        grade_total_ch = {'A+': 0, 'A': 0, 'A-': 0, 'B+': 0, 'B': 0, 'B-': 0, 'C+': 0, 'C': 0, 'C-': 0, 'D+': 0, 'D': 0,
+                          'F': 0}
+        grade_total_count = {'A+': 0, 'A': 0, 'A-': 0, 'B+': 0, 'B': 0, 'B-': 0, 'C+': 0, 'C': 0, 'C-': 0, 'D+': 0,
+                             'D': 0,
+                             'F': 0}
+        grade_points = {'A+': 4.0, 'A': 4.0, 'A-': 3.7, 'B+': 3.3, 'B': 3.0, 'B-': 2.7, 'C+': 2.3, 'C': 2.0, 'C-': 1.7,
+                        'D+': 1.3,
+                        'D': 1.0,
+                        'F': 0.0}
+        for i in range(1, 6):
+            if i == 4:
+                continue
+            for j in range(1, 8):
+                if i == 5 and j == 7:
+                    break
+                while True:
+                    try:
+                        course_ch = int(self.driver.find_element_by_xpath(
+                            f'/html/body/div/section[2]/div/table[{i}]/tbody/tr[{j}]/td[3]').text)
+                        course_grade = self.driver.find_element_by_xpath(
+                            f'/html/body/div/section[2]/div/table[{i}]/tbody/tr[{j}]/td[4]').text
+                        break
+                    except:
+                        pass
+                grade_total_ch[course_grade] += course_ch
+                grade_total_count[course_grade] += 1
+        total_hours = 0
+        total_score = 0
+        for grade, grade_ch in grade_total_ch.items():
+            total_score += grade_total_ch[grade] * grade_points[grade]
+            total_hours += grade_total_ch[grade]
+        total_gpa = total_score / total_hours
+        print(f'\n\nTOTAL GPA:{total_gpa}\t\tTOTAL HOURS:{total_hours}\n')
+        print('\nTOTAL CREDIT HOURS FOR EACH GRADE:\n')
+        sorted_grades = sorted(grade_total_ch.items(), reverse=True, key=operator.itemgetter(1))
+        for item in sorted_grades:
+            print(f'{item[0]}: {item[1]}')
+        print('\nTOTAL COUNT FOR EACH GRADE:\n')
+        sorted_grades = sorted(grade_total_count.items(), reverse=True, key=operator.itemgetter(1))
+        for item in sorted_grades:
+            print(f'{item[0]}: {item[1]}')
+
 
 option = input(
-    '1- Coursework Notifier\n2- Final Grade Notifier\n\n\nPlease choose an option from the above:')
+    '1- Coursework Notifier\n2- Final Grade Notifier\n3- Get stats\n\nPlease choose an option from the above:')
 data = json.load(open('D:\passwords.json'))
 driver = webdriver.Edge('/Users/Mohamed/Downloads/msedgedriver')
 site = Site(driver, data['site_username'], data['site_password'])
@@ -201,4 +255,4 @@ if option == '1':
 if option == '2':
     site.final_grade_notifier()
 if option == '3':
-    site.registration_bot()
+    site.get_stats()
